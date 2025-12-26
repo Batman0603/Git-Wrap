@@ -1,0 +1,87 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-user-service
+      - repo-ingestion-service
+      - repo-analysis-service
+      - recommendation-service
+      - vector-service
+    environment:
+      - PORT=3000
+      - JWT_SECRET=your_super_secret_key
+      - AUTH_SERVICE_URL=http://auth-user-service:4000
+      - INGESTION_SERVICE_URL=http://repo-ingestion-service:5001
+      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:5006
+      - VECTOR_SERVICE_URL=http://vector-service:5005
+
+  auth-user-service:
+    build: ./auth-user-service
+    expose:
+      - "4000"
+    depends_on:
+      - mysql
+    environment:
+      - PORT=4000
+      - JWT_SECRET=your_super_secret_key
+      - DB_HOST=mysql
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
+      - DB_NAME=git_wrap
+      - DB_PORT=3306
+
+  repo-ingestion-service:
+    build: ./repo-ingestion-service
+    expose:
+      - "5001"
+    environment:
+      - PORT=5001
+
+  repo-analysis-service:
+    build: ./repo-analysis-service
+    expose:
+      - "5003"
+    environment:
+      - PORT=5003
+
+  vector-service:
+    build: ./vector-service
+    expose:
+      - "5005"
+    environment:
+      - PORT=5005
+
+  recommendation-service:
+    build: ./recommendation-service
+    expose:
+      - "5006"
+    environment:
+      - PORT=5006
+      # Internal Docker DNS names
+      - ANALYSIS_URL=http://repo-analysis-service:5003
+      - VECTOR_SERVICE_URL=http://vector-service:5005
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: karthi
+      MYSQL_DATABASE: git_wrap
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./auth-user-service/src/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  mysql_data:

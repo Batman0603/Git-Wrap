@@ -28,7 +28,10 @@ export const signup = async (req, res, next) => {
       password_hash
     });
 
-    res.status(201).json({ message: "User created successfully" });
+    const newUser = await findUserByEmailOrUsername(email);
+    const token = generateToken(newUser);
+
+    res.status(201).json({ message: "User created successfully", token });
   } catch (err) {
     next(err);
   }
@@ -55,7 +58,7 @@ export const login = async (req, res, next) => {
       maxAge: 30 * 60 * 1000
     });
 
-    res.json({ message: "Login successful" });
+    res.json({ message: "Login successful", token });
   } catch (err) {
     next(err);
   }

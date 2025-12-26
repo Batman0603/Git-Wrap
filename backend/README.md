@@ -1,248 +1,68 @@
-# 🚀 Git-Wrap
+# Git Wrap Backend
 
-**Discover Open Source Projects You Can Actually Contribute To**
+A microservices-based backend for the Git Wrap application, designed to ingest, analyze, and recommend GitHub repositories using vector similarity search.
 
-Git-Wrap is a backend-first microservices project that helps developers discover open-source repositories that are contribution-ready, based on their skills, interests, and activity signals.
+## 🏗 Architecture
 
-Instead of endlessly searching GitHub, Git-Wrap curates and recommends repositories that are:
+The system is composed of the following microservices:
 
-- Active
-- Beginner / contributor friendly
-- Maintained
-- Relevant to the user’s skillset
+| Service | Port | Description |
+| :--- | :--- | :--- |
+| **API Gateway** | `3000` | The single public entry point. Handles routing and authentication. |
+| **Auth Service** | `4000` | Manages user registration and login (JWT-based). |
+| **Repo Ingestion** | `5001` | Fetches repository metadata from GitHub. |
+| **Repo Analysis** | `5003` | Analyzes repository quality and metrics. |
+| **Vector Service** | `5005` | Stores embeddings and performs semantic search. |
+| **Recommendation** | `5006` | Aggregates data to provide personalized recommendations. |
+| **MySQL** | `3307` | Persistent storage for user data. |
 
-## 🧠 Problem Statement
+## 🚀 Prerequisites
 
-GitHub has millions of repositories, but:
+- **Docker** & **Docker Compose** (Must be running)
+- **Node.js** (v18+ for local development)
 
-- Many are inactive or abandoned
-- Contribution guidelines are unclear
-- Beginners don’t know where to start
-- Maintainer activity is hard to judge
-
-Git-Wrap solves this by analyzing repositories and recommending the right ones to the right users.
-
-## 🏗️ Architecture Overview
-
-This project follows a microservices architecture with a central API Gateway.
-
-```
-Client (Frontend / Bruno)
-        ↓
-     API Gateway
-        ↓
--------------------------------------------------
-| Auth Service | Repo Analysis | Recommendation |
-| Vector / AI  | Repo Ingestion|                |
--------------------------------------------------
-```
-
-*   **API Gateway** → Single entry point
-*   **Auth Service** → User authentication & JWT
-*   **Internal Services** → Private, isolated, scalable
-
-## 📦 Services Overview
-
-### 1️⃣ API Gateway (Port 3000)
-
-- Single public entry point
-- Routes requests to internal services
-- Handles authentication verification
-- Hides internal services from clients
-
-### 2️⃣ Auth User Service (Port 4000)
-
-- User signup & login
-- Password hashing (bcrypt)
-- JWT generation
-- Secure HttpOnly cookie-based authentication
-
-### 3️⃣ Repo Ingestion Service (Planned)
-
-- Fetches repositories from GitHub
-- Stores metadata (stars, forks, issues, etc.)
-
-### 4️⃣ Repo Analysis Service (Planned)
-
-- Calculates:
-  - Contribution readiness score
-  - Maintainer activity
-  - Issue freshness
-  - Repo health
-
-### 5️⃣ Vector Service (Planned)
-
-- Stores embeddings using FAISS
-- Enables semantic search & similarity matching
-
-### 6️⃣ Recommendation Service (Planned)
-
-- Matches users to repositories
-- Uses skills, interests, and repo vectors
-- Ranks and filters results
-
-## 🔐 Authentication Flow
-
-1.  User signs up / logs in via API Gateway
-2.  Auth service generates a JWT
-3.  JWT is stored in an HttpOnly cookie
-4.  API Gateway validates JWT for protected routes
-5.  Internal services trust the gateway
-
-- ✅ **Secure**
-- ✅ **Stateless**
-- ✅ **Scalable**
-
-## 📁 Project Structure
-
-```
-backend/
-│
-├── api-gateway/
-│   ├── src/
-│   │   ├── routes/
-│   │   ├── middlewares/
-│   │   ├── config/
-│   │   └── server.js
-│   ├── package.json
-│   └── Dockerfile
-│
-├── auth-user-service/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── models/
-│   │   ├── services/
-│   │   ├── middlewares/
-│   │   ├── config/
-│   │   └── server.js
-│   ├── package.json
-│   └── Dockerfile
-│
-├── repo-ingestion-service/
-├── repo-analysis-service/
-├── vector-service/
-├── recommendation-service/
-│
-├── shared/
-│   ├── db/
-│   ├── constants/
-│   ├── utils/
-│   └── types/
-│
-├── docker-compose.yml
-└── README.md
-```
-
-## 🛠️ Tech Stack
-
-### Backend
-
-- Node.js
-- Express.js
-- MySQL
-- JWT (Authentication)
-- bcrypt (Password hashing)
-- http-proxy-middleware (API Gateway)
-
-### AI / Recommendation (Planned)
-
-- FAISS (Vector DB)
-- Embeddings (repo descriptions, README, issues)
-
-### Dev & Infra
-
-- Docker & Docker Compose (planned)
-- Bruno (API testing)
-
-## ▶️ How to Run (Development)
+## 🛠 Installation & Setup
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/your-username/git-wrap.git
-    cd git-wrap/backend
+    git clone <repo-url>
+    cd backend
     ```
 
-2.  **Setup Auth User Service**
+2.  **Environment Variables**
+    The `docker-compose.yml` file handles most configuration. Ensure you have a `.env` file in `auth-user-service` if running locally outside Docker.
+
+3.  **Start the Application**
+    Run the following command to build and start all services:
     ```bash
-    cd auth-user-service
-    npm install
-    node src/server.js
+    docker-compose up --build
     ```
-    Runs on: `http://localhost:4000`
 
-3.  **Setup API Gateway**
-    ```bash
-    cd ../api-gateway
-    npm install
-    node src/server.js
-    ```
-    Runs on: `http://localhost:3000`
+    *Note: The first run may take a moment as MySQL initializes.*
 
-## 🧪 Testing with Bruno
+## 🧪 Testing
 
-### Signup
+All requests should be sent to the **API Gateway** at `http://localhost:3000`.
 
-`POST http://localhost:3000/auth/api/auth/signup`
+See API Documentation for detailed endpoints.
 
-```json
-{
-  "username": "buddy123",
-  "fullName": "Buddy Tester",
-  "email": "buddy@test.com",
-  "password": "password123",
-  "confirmPassword": "password123"
-}
+### Quick Start Flow
+1.  **Signup**: `POST /auth/signup`
+2.  **Login**: `POST /auth/login` (Copy the `token`)
+3.  **Search Repos**: `GET /repos/search?query=react` (Find repos to analyze)
+4.  **Ingest Repo**: `POST /vectors/ingest` (Store repo for analysis)
+5.  **Get Recommendations**: `GET /api/recommend?keyword=react` (Get personalized suggestions)
+
+## 📂 Directory Structure
+
 ```
-
-### Login
-
-`POST http://localhost:3000/auth/api/auth/login`
-
-```json
-{
-  "identifier": "buddy123",
-  "password": "password123"
-}
+backend/
+├── api-gateway/          # Entry point & Auth Middleware
+├── auth-user-service/    # User management & DB logic
+├── repo-ingestion/       # GitHub API integration
+├── repo-analysis/        # Code quality analysis
+├── vector-service/       # FAISS/Vector storage
+├── recommendation/       # Recommendation logic
+├── docker-compose.yml    # Orchestration
+└── docs/                 # Documentation
 ```
-
-JWT will be stored securely in an HttpOnly cookie.
-
-## 🚧 Current Status
-
-- ✅ API Gateway
-- ✅ Auth Service
-- ✅ JWT-based authentication
-- 🚧 Repo ingestion
-- 🚧 Repo analysis
-- 🚧 Recommendation engine
-- 🚧 Vector search
-
-## 🎯 Future Improvements
-
-- OAuth login (GitHub)
-- Advanced filtering (language, difficulty)
-- Contribution readiness scoring
-- Dead / inactive repo detection
-- Personalized recommendations
-- Rate limiting & monitoring
-- Full Dockerized setup
-- Frontend dashboard
-
-## 👤 Author
-
-- **Karthikeyan R**
-- Aspiring Full Stack Developer
-- AI & Data Science Student
-
-## 📌 Final Note
-
-This project is intentionally backend-first, focusing on:
-
-- Clean architecture
-- Real-world microservices patterns
-- Scalable authentication
-- Production-style API design
-
-Not a toy project. Not a tutorial clone.
-A foundation for something real.
