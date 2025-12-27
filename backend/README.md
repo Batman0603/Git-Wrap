@@ -57,12 +57,78 @@ See API Documentation for detailed endpoints.
 
 ```
 backend/
-├── api-gateway/          # Entry point & Auth Middleware
-├── auth-user-service/    # User management & DB logic
-├── repo-ingestion/       # GitHub API integration
-├── repo-analysis/        # Code quality analysis
-├── vector-service/       # FAISS/Vector storage
-├── recommendation/       # Recommendation logic
-├── docker-compose.yml    # Orchestration
-└── docs/                 # Documentation
+│
+├── api-gateway/
+│   ├── src/
+│   │   ├── routes/
+│   │   ├── middlewares/
+│   │   ├── config/
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── auth-user-service/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── models/
+│   │   ├── services/
+│   │   ├── middlewares/
+│   │   ├── config/
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── repo-ingestion-service/
+│   ├── src/
+│   │   ├── jobs/
+│   │   ├── services/
+│   │   ├── github/
+│   │   ├── models/
+│   │   ├── config/
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── repo-analysis-service/
+│   ├── src/
+│   │   ├── scorers/
+│   │   ├── services/
+│   │   ├── models/
+│   │   ├── config/
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── vector-service/
+│   ├── src/
+│   │   ├── embeddings/
+│   │   ├── faiss/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── config/
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── recommendation-service/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── rankers/
+│   │   ├── filters/
+│   │   ├── config/
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── shared/
+│   ├── db/
+│   ├── constants/
+│   ├── utils/
+│   └── types/
+│
+├── docker-compose.yml
+└── README.md
+
 ```
